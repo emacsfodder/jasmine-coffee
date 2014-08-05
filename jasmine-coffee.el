@@ -220,61 +220,125 @@
     (browse-url (url-encode-url (concat jasmine-coffee/base-url spec-string)))))
 
 (defun jasmine-coffee/var-to-lazy ()
-  "Convert local var on the current line to a lazy.
+  "Convert local var on the current line to a `lazy'.
 See Jasmine-let github.com:xaethos/jasmine-let.git"
   (interactive)
   (save-excursion
     (jasmine-coffee/var-to-function-form "lazy")))
 
 (defun jasmine-coffee/var-to-jlet ()
-  "Convert local var on the current line to a jlet.
+  "Convert local var on the current line to a `jlet'.
 
-jlet is a lazy evaluation variable form for jasmine, similar to
-jasmine-let.  It is not a part of jasmine."
+`jlet' is a lazy evaluation variable form for jasmine, similar to
+rspec's `let'.  It is not a part of jasmine."
   (interactive)
   (save-excursion
     (jasmine-coffee/var-to-function-form "jlet")))
 
 (defun jasmine-coffee/var-to-jset ()
-  "Convert local var on the current line to a jset.
+  "Convert local var on the current line to a `jset'.
 
-jset is a variable evaluation form similar to rspec's let!.
+`jset' is a variable evaluation form similar to rspec's `let!'.
 It is not a part of jasmine."
   (interactive)
   (save-excursion
     (jasmine-coffee/var-to-function-form "jset")))
 
 (defun jasmine-coffee/move-to-previous-describe ()
-  "Move the current line or region to the previous describe body."
+  "Move the current line or region to the previous `describe' body."
   (interactive)
   (jasmine-coffee/move-to-previous-thing jasmine-coffee/describe-regexp))
 
 (defun jasmine-coffee/move-to-previous-before-each ()
-  "Move the current line or region to the previous beforeEach body."
+  "Move the current line or region to the previous `beforeEach' body."
   (interactive)
   (jasmine-coffee/move-to-previous-thing jasmine-coffee/before-each-regexp))
 
 (defun jasmine-coffee/verify-describe ()
-  "Compose and launch Spec URL for the current describe block."
+  "Compose and launch Spec URL for the current `describe' block."
   (interactive)
   (jasmine-coffee/verify-thing jasmine-coffee/describe-regexp))
 
 (defun jasmine-coffee/verify-group ()
   "Alias for verify describe.
-Compose and launch Spec URL for the current describe block."
+Compose and launch Spec URL for the current `describe' block."
   (interactive)
   (jasmine-coffee/verify-describe))
 
 (defun jasmine-coffee/verify-it ()
-  "Compose and launch spec URL for the current spec."
+  "Compose and launch spec URL for the current `it' spec."
   (interactive)
   (jasmine-coffee/verify-thing jasmine-coffee/it-regexp))
 
 (defun jasmine-coffee/verify-single ()
-  "Alias for verify it.
-Compose and launch spec URL for the current spec."
+  "Alias for verify-it.
+Compose and launch spec URL for the current `it' spec."
   (interactive)
   (jasmine-coffee/verify-it))
+
+(defun jasmine-coffee/navigate-to-next-thing (regexp)
+  "Navigate cursor to the body of the next matching REGEXP."
+  (with-demoted-errors
+    (re-search-forward regexp))
+  (forward-line 1)
+  (jc/move-to-indentation))
+
+(defun jasmine-coffee/navigate-to-previous-thing (regexp)
+  "Navigate cursor to the body of the previous REGEXP."
+  (with-demoted-errors
+    (re-search-backward regexp))
+  (forward-line 1)
+  (jc/move-to-indentation))
+
+(defun jasmine-coffee/navigate-to-next-it ()
+  "Navigate cursor to the body of the next `it' spec."
+  (interactive)
+  (jasmine-coffee/navigate-to-next-thing jasmine-coffee/it-regexp))
+
+(defun jasmine-coffee/navigate-to-previous-it ()
+  "Navigate cursor to the body of the previous `it' spec."
+  (interactive)
+  (jasmine-coffee/navigate-to-previous-thing jasmine-coffee/it-regexp))
+
+(defun jasmine-coffee/navigate-to-next-describe ()
+  "Navigate cursor to the body of the next `describe' block."
+  (interactive)
+  (jasmine-coffee/navigate-to-next-thing jasmine-coffee/describe-regexp))
+
+(defun jasmine-coffee/navigate-to-previous-describe ()
+  "Navigate cursor to the body of the previous `describe' block."
+  (interactive)
+  (jasmine-coffee/navigate-to-previous-thing jasmine-coffee/describe-regexp))
+
+(defun jasmine-coffee/navigate-to-next-before-each ()
+  "Navigate cursor to the body of the next `beforeEach' block."
+  (interactive)
+  (jasmine-coffee/navigate-to-previous-thing jasmine-coffee/before-each-regexp))
+
+(defun jasmine-coffee/navigate-to-previous-before-each ()
+  "Navigate cursor to the body of the previous `beforeEach' block."
+  (interactive)
+  (jasmine-coffee/navigate-to-previous-thing jasmine-coffee/before-each-regexp))
+
+(defun jasmine-coffee/toggle-spec-enabled ()
+  "Toggle the current `it' spec on/off."
+  (interactive)
+  (save-excursion
+    (jc/end-of-line)
+    (with-demoted-errors
+      (re-search-backward (rx line-start (+ blank) "it" (group (? "x")))))
+    (jc/move-to-indentation)
+    (when (looking-at "it ") (forward-char 2) (insert "x"))
+    (when (looking-at "itx") (forward-char 2) (delete-char 1))))
+
+(defun jc/move-to-indentation ()
+  "Internal function to jump to indentation column."
+  (jc/end-of-line)
+  (back-to-indentation))
+
+(defun jc/end-of-line ()
+  "Internal function jump to end of line."
+  (move-end-of-line 1))
 
 (provide 'jasmine-coffee)
 ;;; jasmine-coffee.el ends here
