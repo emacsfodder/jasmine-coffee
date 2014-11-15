@@ -1,6 +1,6 @@
 ;;; jasmine-coffee --- Helpers for Jasmine (in coffeescript).
 ;;; Author: Jason Milkins
-;;; Version: 20140730
+;;; Version: 20141115
 ;;; Commentary:
 ;;
 ;;  This file is not a part of Emacs
@@ -19,90 +19,125 @@
 ;;
 ;; To your `~/.emacs` (or ~/.emacs.d/init.el).
 ;;
-;; ### Spec launchers
+;; ## Commands
 ;;
-;; Launch the first Jasmine coffee-script `it` spec found at or above the
-;; current point.
+;; ### Code transforms
 ;;
-;;     M-x jasmine-coffee/verify-it
-;;     M-x jasmine-coffee/verify-single
+;; * `jasmine-coffee/toggle-spec-enabled`
 ;;
-;; Launch the first Jasmine coffee-script `describe` group found at or
-;; above the current point.
+;; Convert an `it` to an `xit`
 ;;
-;;     M-x jasmine-coffee/verify-describe
-;;     M-x jasmine-coffee/verify-group
+;; * `jasmine-coffee/var-to-lazy`
 ;;
-;; Set the variable `jasmine-coffee/base-url` to set your jasmine spec runner base URL.
+;; Convert a variable assignment to `lazy` eg.
 ;;
-;; e.g.
+;;     myVariable = "value"
 ;;
-;;     (setq jasmine-coffee/base-url "http://localhost:3000/jasmine?spec=")
+;; Becomes
 ;;
-;; The helper commands above will compose the URL for you.  Note I've
-;; only tested this with Jasmine-rice, so please post an issue if you use
-;; the Karma runner or another Jasmine runner, and you find this
-;; incompatible.
+;;     lazy 'myVariable', -> "value"
 ;;
-;; ### Moving to outer blocks
+;; `lazy` is equivalent to RSpec's `let`
 ;;
-;; These commands move the current line or region into enclosing `describe`
-;; block (useful for lazy/jlet) or into the previous `beforeEach`.
+;; * `jasmine-coffee/var-to-jlet`
 ;;
-;; Move the current line or region to the previous `describe` body
+;; Convert a variable assignment to `jlet` eg.
 ;;
-;;     M-x jasmine-coffee/move-to-previous-describe
+;;     myVariable = "value"
 ;;
-;; Move the current line or region to the previous `beforeEach` body
+;; Becomes
 ;;
-;;     M-x jasmine-coffee/move-to-previous-before-each
+;;     jlet 'myVariable', -> "value"
 ;;
-;; ### Lazily evaluated vars
+;; `jlet` is equivalent to RSpec's `let`
 ;;
-;; Jasmine-Let by Diego Garcia (github @xaethos) allows you to use a lazy
-;; variable which is evaluated when your `it` spec is run.  For more info
-;; see: https://github.com/xaethos/jasmine-let
+;; * `jasmine-coffee/var-to-jset`
 ;;
-;; Convert a local var assignment to a `lazy`
+;; Convert a variable assignment to `jset` eg.
 ;;
-;;     M-x jasmine-coffee/var-to-lazy
+;;     myVariable = "value"
 ;;
-;; In my day-to-day we assign `jasmineLet` to an alias `jlet` (instead of
-;; `lazy`) so this command is really just for me and my team.
+;; Becomes
 ;;
-;; Convert a local var assignment to a `jlet`
+;;     jset 'myVariable', -> "value"
 ;;
-;;     M-x jasmine-coffee/var-to-jlet
+;; `jset` is equivalent to RSpec's `let!`
 ;;
-;; We also use `jset` which works like `let!` in rspec, so:
+;; ### Move spec code
 ;;
-;; Convert a local var assignment to a `jset`
+;; * `jasmine-coffee/move-to-previous-describe`
 ;;
-;;     M-x jasmine-coffee/var-to-jset
+;; Move the current selection or line to the previous `describe`
+;; statment (moving code from an `it` or `beforeEach` for example.)
 ;;
-;; ### More
+;; Note: This command doesn't move code from one `describe` to the
+;; previous one.
 ;;
-;; I have a collection of coffee-mode yasnippets for jasmine, which I'll
-;; migrate to this package soon.
+;; * `jasmine-coffee/move-to-previous-before-each`
 ;;
-;; If you're impatient to grab them, you can get them directly from my
-;; `.emacs.d`.  See the coffee-mode snippets folder
-;; https://github.com/ocodo/emacs.d/tree/master/snippets/coffee-mode
+;; Move the current selection or line from an `it` spec, to the
+;; previous `beforeEach`.
 ;;
-;; I'll also be adding navigation and further editing helpers (feature
-;; matching
-;; [buster-mode](https://gitorious.org/buster/buster-mode/source/c9d4b6b6f85283e18363c8236620905f58110831:buster-mode.el))
+;; ### Verify specs and groups
+;;
+;; * `jasmine-coffee/verify-describe` & `jasmine-coffee/verify-group`
+;;
+;; Verify the current describe block via opening a jasmine url, using
+;; `jasmine-coffee/base-url` (a custom variable)
+;;
+;; * `jasmine-coffee/verify-it` & `jasmine-coffee/verify-single`
+;;
+;; Launch the current spec in a browser window, using the
+;; jasmine-coffee/base-url (custom variable)
+;;
+;; ### Navigations
+;;
+;; These commands should be self explanatory
+;;
+;; * `jasmine-coffee/navigate-to-next-it`
+;;
+;; * `jasmine-coffee/navigate-to-previous-it`
+;;
+;; * `jasmine-coffee/navigate-to-next-describe`
+;;
+;; * `jasmine-coffee/navigate-to-previous-describe`
+;;
+;; * `jasmine-coffee/navigate-to-next-before-each`
+;;
+;; * `jasmine-coffee/navigate-to-previous-before-each`
+;;
+;; ### Code / Spec toggling
+;;
+;; * `jasmine-coffee/toggle-code-and-spec`
+;;
+;; Switch between the Spec / Code of the current spec or code file.
+;; Set the following customizable variables to tailor for your own
+;; projects.
+;;
+;; * `jasmine-coffee/code-root` - location of code, defaults to `app/assets/javascripts`
+;; * `jasmine-coffee/spec-root` - location of specs, defaults to `spec/javascripts`
+;; * `jasmine-coffee/extension` - standard coffeescript file extension, defaults to `.js.coffee` (Rails style)
+;; * `jasmine-coffee/spec-suffix` - standard spec name suffix, defaults to `_spec`
 ;;
 ;;; Licence: GPL3
 ;;
-;;; Requires: ((coffee-mode))
+;;; Requires: ((coffee-mode) (s) (dash) (projectile))
 ;;; Code:
 
 (require 'coffee-mode)
+(require 's)
+(require 'dash)
+(require 'projectile)
 
-(defvar jasmine-coffee/base-url
+(defgroup jasmine-coffee nil
+  "Tools for Jasmine on CoffeeScript."
+  :group 'coffees)
+
+(defcustom jasmine-coffee/base-url
   "http://localhost:3000/jasmine?spec="
-  "Base URL for our Jasmine spec runner.")
+  "Base URL for our Jasmine spec runner."
+  :type 'string
+  :group 'jasmine-coffee)
 
 (defvar jasmine-coffee/it-regexp
   (rx "it" (any " " "(") (zero-or-more " ")
@@ -121,15 +156,43 @@
   "Regexp to find a jasmine coffee-mode `describe'.")
 
 (defvar jasmine-coffee/before-each-regexp
-  (rx "beforeEach" (? "(") (? " ") "->")
+  (rx "beforeEach" (? "(") (? " ")
+      (? "asyncSpec") (? "(") (? " ")  (? "(done)")
+      (? " ") "->")
   "Regexp to find a jasmine coffee-mode `beforeEach'.")
+
+(defcustom jasmine-coffee/jasmine-specs-file "JASMINE_SPECS.yml"
+  "Name of the Jasmine specs index file."
+  :type 'string
+  :group 'jasmine-coffee)
+
+(defcustom jasmine-coffee/code-root "/app/assets/javascripts"
+  "JavaScript app code root folder."
+  :type 'string
+  :group 'jasmine-coffee)
+
+(defcustom jasmine-coffee/spec-root "/spec/javascripts"
+  "JavaScript app spec root folder."
+  :type 'string
+  :group 'jasmine-coffee)
+
+(defcustom jasmine-coffee/extension ".js.coffee"
+  "Standard extension of coffeescript files in project."
+  :type 'string
+  :group 'jasmine-coffee)
+
+(defcustom jasmine-coffee/spec-suffix "_spec"
+  "Spec filename suffix.
+ie. Appears before filename extension."
+  :type 'string
+  :group 'jasmine-coffee)
 
 (defun jasmine-coffee/kill-line-or-region ()
   "Utility function to kill whole line or region."
   (let (region)
     (setq region (if (use-region-p)
                      (list (region-beginning) (region-end))
-                     (list (line-beginning-position) (line-beginning-position 2))))
+                   (list (line-beginning-position) (line-beginning-position 2))))
     (kill-region (car region) (car (cdr region)))))
 
 (defun jasmine-coffee/var-to-function-form (function-call-prefix)
@@ -202,22 +265,37 @@
       (coffee-newline-and-indent)
       (jasmine-coffee/reset-indentation indent-list))))
 
-(defun jasmine-coffee/verify-thing (pattern)
-  "Compose and launch a jasmine spec URL for the thing defined by PATTERN."
-  (let* ((start-column 0) (spec-string ""))
+(defun jasmine-coffee/spec-meta-data (pattern)
+  "Collec jasmine spec metadata matching nearest PATTERN."
+  (let* ((start-column 0)
+         (spec-string "")
+         spec-column
+         spec-line)
     (save-excursion
       (move-end-of-line 1)
       (re-search-backward pattern)
       (setq start-column (current-column))
+      (setq spec-column start-column)
+      (setq spec-line  (line-number-at-pos))
       (setq spec-string (match-string-no-properties 1))
       (while
           (re-search-backward jasmine-coffee/describe-regexp 0 t)
         (when (< (current-column) start-column)
           (setq start-column (current-column))
           (setq spec-string (format "%s %s" (match-string 1) spec-string)))))
-    (setq spec-string (replace-regexp-in-string "#" "%23" spec-string))
+    (list
+     (url-encode-url (replace-regexp-in-string "#" "%23" spec-string))
+     spec-column
+     spec-line
+     (buffer-file-name))))
+
+(defun jasmine-coffee/verify-thing (pattern)
+  "Launch a composed jasmine spec URL.
+For the nearest thing behind the
+current cursor, defined by PATTERN."
+  (let* ((spec-string (car (jasmine-coffee/spec-meta-data pattern))))
     (save-current-buffer)
-    (browse-url (url-encode-url (concat jasmine-coffee/base-url spec-string)))))
+    (browse-url (concat jasmine-coffee/base-url spec-string))))
 
 (defun jasmine-coffee/var-to-lazy ()
   "Convert local var on the current line to a `lazy'.
@@ -279,14 +357,14 @@ Compose and launch spec URL for the current `it' spec."
 (defun jasmine-coffee/navigate-to-next-thing (regexp)
   "Navigate cursor to the body of the next matching REGEXP."
   (with-demoted-errors
-    (re-search-forward regexp))
+      (re-search-forward regexp))
   (forward-line 1)
   (jc/move-to-indentation))
 
 (defun jasmine-coffee/navigate-to-previous-thing (regexp)
   "Navigate cursor to the body of the previous REGEXP."
   (with-demoted-errors
-    (re-search-backward regexp))
+      (re-search-backward regexp))
   (forward-line 1)
   (jc/move-to-indentation))
 
@@ -313,12 +391,122 @@ Compose and launch spec URL for the current `it' spec."
 (defun jasmine-coffee/navigate-to-next-before-each ()
   "Navigate cursor to the body of the next `beforeEach' block."
   (interactive)
-  (jasmine-coffee/navigate-to-previous-thing jasmine-coffee/before-each-regexp))
+  (jasmine-coffee/navigate-to-next-thing jasmine-coffee/before-each-regexp))
 
 (defun jasmine-coffee/navigate-to-previous-before-each ()
   "Navigate cursor to the body of the previous `beforeEach' block."
   (interactive)
   (jasmine-coffee/navigate-to-previous-thing jasmine-coffee/before-each-regexp))
+
+(defun jasmine-coffee/toggle-code-and-spec ()
+  "Toggle between the current spec and code."
+  (interactive)
+  (let* ((ext-spec    (format "%s%s" jasmine-coffee/spec-suffix jasmine-coffee/extension))
+         (ext-code    jasmine-coffee/extension)
+         (is-coffee   (s-contains? jasmine-coffee/extension (buffer-file-name)))
+         (is-a-spec   (s-contains? ext-spec (buffer-file-name)))
+         (roots       (list jasmine-coffee/code-root jasmine-coffee/spec-root))
+         (exts        (list ext-code ext-spec))
+         target-file)
+
+    (if is-coffee
+        (progn
+          (when is-a-spec
+            (setq roots (nreverse roots))
+            (setq exts (nreverse exts)))
+
+          (add-to-list 'roots (buffer-file-name) t)
+          (add-to-list 'exts (apply 's-replace roots) t)
+
+          (find-file (apply 's-replace exts))
+
+          (message "Not a jasmine coffee file")))))
+
+(defun jasmine-coffee/jump-to-data-store ()
+  "Jump to a data-store."
+
+  )
+
+(defun jasmine-coffee/toggle-view-model-and-view ()
+  "Jump between view and view model."
+  (let (
+        (jump-list
+         '(templates ("/templates/" "/templates/\\(.*\\)\\(\\.hamlc\\)" "/templates/\\1.hamlc")
+                     views ("/views/" "/views/\\(.*\\)\\_view\\(\\.js.coffee\\)" "/views/\\1_view\\2")
+                     view-models ("/view_models/" "/view_models/\\(.*\\)\\(\\.js.coffee\\)" "/view_models/\\1\\2"))))))
+
+(defun jasmine-coffee/find-spec-by-url (&optional url)
+  "Find a jasmine spec by the supplied spec URL.
+
+It uses the JASMINE_SPECS file to find and open the
+spec described by the given URL."
+
+  )
+
+(defun jasmine-coffee/collect-specs (pattern)
+  "Gather the spec strings by PATTERN and TYPE, then add them to the SPEC-LIST."
+  (let (current-spec spec-list)
+    (goto-char (point-max))
+    (while (re-search-backward pattern 0 t)
+      (jc/end-of-line)
+      (setq current-spec
+            (apply 'format
+                   (-flatten
+                    (list "- file: %s\n  line: %d\n  col: %d\n  url: %s"
+                          (reverse (jasmine-coffee/spec-meta-data pattern))))))
+      (add-to-list 'spec-list current-spec t)
+      (beginning-of-line))
+    spec-list))
+
+(defun jasmine-coffee/index-specs (&optional spec-file)
+  "Index a jasmine-spec SPEC-FILE."
+
+  (when spec-file (find-file spec-file))
+
+  (let* ((ext-spec      (format "%s%s" jasmine-coffee/spec-suffix jasmine-coffee/extension))
+         (is-a-spec     (s-contains? ext-spec (buffer-file-name)))
+         (path-filename (buffer-file-name))
+         spec-line
+         spec-column
+         current-spec)
+    (if is-a-spec
+        (save-excursion
+          (-flatten (list
+                     (jasmine-coffee/collect-specs jasmine-coffee/describe-regexp)
+                     (jasmine-coffee/collect-specs jasmine-coffee/it-regexp))))
+      nil)))
+
+(defun jasmine-coffee/index-spec-to-file (&optional spec-file index-file)
+  "Write SPEC-FILE index to INDEX-FILE."
+  (let* (specs-list)
+    (unless spec-file (setq spec-file (buffer-file-name)))
+    (unless (and index-file
+                 (file-exists-p index-file))
+      (setq index-file
+            (format "%s/%s"
+                    projectile--project-root
+                    jasmine-coffee/jasmine-specs-file)))
+    (setq specs-list (jasmine-coffee/index-specs spec-file))
+    (when specs-list
+      (append-to-file (s-join "\n" specs-list) nil index-file))))
+
+(defun jasmine-coffee/index-all-specs (&optional index-file spec-folder)
+  "Generate jasmine specs INDEX-FILE for all specs found in SPEC-FOLDER."
+  (unless (and index-file
+               (file-exists-p index-file))
+    (setq index-file
+          (format "%s/%s"
+                  projectile--project-root
+                  jasmine-coffee/jasmine-specs-file)))
+
+  (unless spec-folder
+    (setq spec-folder
+          (format "%s/%s"
+                  projectile--project-root
+                  jasmine-coffee/spec-root)))
+
+  (dolist (f (projectile-files-in-project-directory spec-folder))
+    (jasmine-coffee/index-spec-to-file f index-file)))
 
 (defun jasmine-coffee/toggle-spec-enabled ()
   "Toggle the current `it' spec on/off."
@@ -326,7 +514,7 @@ Compose and launch spec URL for the current `it' spec."
   (save-excursion
     (jc/end-of-line)
     (with-demoted-errors
-      (re-search-backward (rx line-start (+ blank) "it" (group (? "x")))))
+        (re-search-backward (rx line-start (+ blank) "it" (group (? "x")))))
     (jc/move-to-indentation)
     (when (looking-at "it ") (forward-char 2) (insert "x"))
     (when (looking-at "itx") (forward-char 2) (delete-char 1))))

@@ -1,91 +1,122 @@
-# jasmine-coffee
+*Author:* Jason Milkins<br>
+*Version:* 20141114<br>
 
-Helpful stuff for Jasmine on CoffeeScript
+ This file is not a part of Emacs
 
 ## Installation
 
 This script is still very much a work in-progress, so it's not
-available via MELPA or any other package repository yet. 
+available via MELPA or any other package repository yet.
 
-Installation is manual only:
+## Installation is manual only
 
-Place the `jasmine-coffee.el` script in your emacs `load-path` and add:
+Place the `jasmine-coffee.el` script in your Emacs `load-path` and add:
 
-    (eval-after-load "coffee-mode"
-        (require 'jasmine-coffee))
+        (eval-after-load "coffee-mode"
+            (require 'jasmine-coffee))
 
 To your `~/.emacs` (or ~/.emacs.d/init.el).
 
-### Spec launchers
+## Commands
 
-Launch the first Jasmine coffee-script `it` spec found at or above the
-current point.
+### Code transforms
 
-    M-x jasmine-coffee/verify-it
-    M-x jasmine-coffee/verify-single
+* `jasmine-coffee/toggle-spec-enabled`
 
-Launch the first Jasmine coffee-script `describe` group found at or
-above the current point.
+Convert an `it` to an `xit`
 
-    M-x jasmine-coffee/verify-describe
-    M-x jasmine-coffee/verify-group
+* `jasmine-coffee/var-to-lazy`
 
-Set the variable `jasmine-coffee/base-url` to set your jasmine spec runner base URL.
+Convert a variable assignment to `lazy` eg.
 
-e.g.
-   
-    (setq jasmine-coffee/base-url "http://localhost:3000/jasmine?spec=")
+    myVariable = "value"
 
-The helper commands above will compose the URL for you.  Note I've
-only tested this with Jasmine-rice, so please post an issue if you use
-the Karma runner or another Jasmine runner, and you find this
-incompatible.
+Becomes
 
-### Moving to outer blocks
+    lazy 'myVariable', -> "value"
 
-These commands move the current line or region into enclosing `describe`
-block (useful for lazy/jlet) or into the previous `beforeEach`.
+`lazy` is equivalent to RSpec`s `let`
 
-Move the current line or region to the previous `describe` body
+* `jasmine-coffee/var-to-jlet`
 
-    M-x jasmine-coffee/move-to-previous-describe
+Convert a variable assignment to `jlet` eg.
 
-Move the current line or region to the previous `beforeEach` body
+    myVariable = "value"
 
-    M-x jasmine-coffee/move-to-previous-before-each
+Becomes
 
-### Lazily evaluated vars
+    jlet 'myVariable', -> "value"
 
-Jasmine-Let by Diego Garcia (github @xaethos) allows you to use a lazy
-variable which is evaluated when your `it` spec is run. For more info
-see: https://github.com/xaethos/jasmine-let
+`jlet` is equivalent to RSpec`s `let`
 
-Convert a local var assignment to a `lazy`
+* `jasmine-coffee/var-to-jset`
 
-    M-x jasmine-coffee/var-to-lazy
+Convert a variable assignment to `jset` eg.
 
-In my day-to-day we assign `jasmineLet` to an alias `jlet` (instead of
-`lazy`) so this command is really just for me and my team.
+    myVariable = "value"
 
-Convert a local var assignment to a `jlet`
+Becomes
 
-    M-x jasmine-coffee/var-to-jlet
+    jset 'myVariable', -> "value"
 
-We also use `jset` which works like `let!` in rspec, so:
+`jset` is equivalent to RSpec`s `let!`
 
-Convert a local var assignment to a `jset`
+### Move spec code
 
-    M-x jasmine-coffee/var-to-jset
+* `jasmine-coffee/move-to-previous-describe`
 
-### More
+Move the current selection or line to the previous `describe`
+statment (moving code from an `it` or `beforeEach` for example.)
 
-I have a collection of coffee-mode yasnippets for jasmine, which I'll
-migrate to this package soon. 
+Note: This command doesn't move code from one `describe` to the
+previous one.
 
-If you're impatient to grab them, you can get them directly from my
-`.emacs.d`.  See the coffee-mode snippets folder
-https://github.com/ocodo/emacs.d/tree/master/snippets/coffee-mode
+* `jasmine-coffee/move-to-previous-before-each`
 
-I'll also be adding navigation and further editing helpers (feature
-matching
-[buster-mode](https://gitorious.org/buster/buster-mode/source/c9d4b6b6f85283e18363c8236620905f58110831:buster-mode.el))
+Move the current selection or line from an `it` spec, to the
+previous `beforeEach`.
+
+### Verify specs and groups
+
+* `jasmine-coffee/verify-describe` & `jasmine-coffee/verify-group`
+
+Verify the current describe block via opening a jasmine url, using
+`jasmine-coffee/base-url` (a custom variable)
+
+* `jasmine-coffee/verify-it` & `jasmine-coffee/verify-single`
+
+Launch the current spec in a browser window, using the
+jasmine-coffee/base-url (custom variable)
+
+### Navigations
+
+These commands should be self explanatory
+
+* `jasmine-coffee/navigate-to-next-it`
+* `jasmine-coffee/navigate-to-previous-it`
+* `jasmine-coffee/navigate-to-next-describe`
+* `jasmine-coffee/navigate-to-previous-describe`
+* `jasmine-coffee/navigate-to-next-before-each`
+* `jasmine-coffee/navigate-to-previous-before-each`
+
+### Code / Spec toggling
+
+* `jasmine-coffee/toggle-code-and-spec`
+
+Switch between the Spec / Code of the current spec or code file.
+Set the following customizable variables to tailor for your own
+projects.
+
+* `jasmine-coffee/code-root` - location of code, defaults to `app/assets/javascripts`
+* `jasmine-coffee/spec-root` - location of specs, defaults to `spec/javascripts`
+* `jasmine-coffee/extension` - standard coffeescript file extension, defaults to `.js.coffee` (Rails style)
+* `jasmine-coffee/spec-suffix` - standard spec name suffix, defaults to `_spec`
+
+Licence: GPL3
+
+Requires: ((coffee-mode) (s) (dash) (projectile))
+Code:
+
+
+---
+Converted from `jasmine-coffee.el` by [*el2markdown*](https://github.com/Lindydancer/el2markdown).
